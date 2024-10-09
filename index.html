@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Washingtone Aura's GitHub Stats</title>
+    <title>GitHub Stats</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -11,6 +11,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            flex-direction: column;
             height: 100vh;
             margin: 0;
         }
@@ -20,6 +21,7 @@
             border-radius: 8px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             text-align: center;
+            margin: 10px;
         }
         h1 {
             color: #333;
@@ -39,11 +41,20 @@
         <div class="stat">Contributed to (last year): <span id="contributed-to">0</span></div>
     </div>
 
+    <div class="stats-card">
+        <h1>Organization GitHub Stats</h1>
+        <div class="stat">Total Stars Earned: <span id="org-total-stars">0</span></div>
+        <div class="stat">Total Repositories: <span id="org-total-repos">0</span></div>
+        <div class="stat">Total Issues: <span id="org-total-issues">0</span></div>
+        <div class="stat">Contributed to (last year): <span id="org-contributed-to">0</span></div>
+    </div>
+
     <script>
         const username = 'washingtoneaura'; // Replace with your GitHub username
+        const orgName = 'ngongroad'; // Replace with your organization name
 
-        // Function to fetch GitHub data
-        async function fetchGitHubData() {
+        // Function to fetch personal GitHub data
+        async function fetchPersonalGitHubData() {
             const [reposResponse, eventsResponse] = await Promise.all([
                 fetch(`https://api.github.com/users/${username}/repos`),
                 fetch(`https://api.github.com/users/${username}/events`)
@@ -60,8 +71,8 @@
             const totalCommits = events.filter(event => event.type === 'PushEvent' && new Date(event.created_at).getFullYear() === 2024).length;
             document.getElementById('total-commits').innerText = totalCommits;
 
-            // Calculate total PRs
-            const totalPRs = repos.reduce((acc, repo) => acc + repo.open_issues_count, 0); // Assuming open issues as PRs
+            // Calculate total PRs (assuming open issues as PRs)
+            const totalPRs = repos.reduce((acc, repo) => acc + repo.open_issues_count, 0);
             document.getElementById('total-prs').innerText = totalPRs;
 
             // Calculate total issues
@@ -73,8 +84,36 @@
             document.getElementById('contributed-to').innerText = lastYearContributions;
         }
 
-        // Fetch GitHub data on page load
-        fetchGitHubData();
+        // Function to fetch organization data
+        async function fetchOrgData() {
+            const [reposResponse, eventsResponse] = await Promise.all([
+                fetch(`https://api.github.com/orgs/${orgName}/repos`),
+                fetch(`https://api.github.com/orgs/${orgName}/events`)
+            ]);
+
+            const repos = await reposResponse.json();
+            const events = await eventsResponse.json();
+
+            // Calculate total stars earned
+            const totalStars = repos.reduce((acc, repo) => acc + repo.stargazers_count, 0);
+            document.getElementById('org-total-stars').innerText = totalStars;
+
+            // Calculate total repositories
+            const totalRepos = repos.length;
+            document.getElementById('org-total-repos').innerText = totalRepos;
+
+            // Calculate total issues
+            const totalIssues = repos.reduce((acc, repo) => acc + repo.open_issues_count, 0);
+            document.getElementById('org-total-issues').innerText = totalIssues;
+
+            // Calculate contributions in the last year
+            const lastYearContributions = events.filter(event => new Date(event.created_at).getFullYear() === new Date().getFullYear() - 1).length;
+            document.getElementById('org-contributed-to').innerText = lastYearContributions;
+        }
+
+        // Fetch data on page load
+        fetchPersonalGitHubData();
+        fetchOrgData();
     </script>
 </body>
 </html>
