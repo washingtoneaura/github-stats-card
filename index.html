@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Washingtone Aura's GitHub Stats</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .stats-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+        }
+        .stat {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="stats-card">
+        <h1>Washingtone Aura's GitHub Stats</h1>
+        <div class="stat">Total Stars Earned: <span id="total-stars">0</span></div>
+        <div class="stat">Total Commits (2024): <span id="total-commits">0</span></div>
+        <div class="stat">Total PRs: <span id="total-prs">0</span></div>
+        <div class="stat">Total Issues: <span id="total-issues">0</span></div>
+        <div class="stat">Contributed to (last year): <span id="contributed-to">0</span></div>
+    </div>
+
+    <script>
+        const username = 'washingtoneaura'; // Replace with your GitHub username
+
+        // Function to fetch GitHub data
+        async function fetchGitHubData() {
+            const [reposResponse, eventsResponse] = await Promise.all([
+                fetch(`https://api.github.com/users/${username}/repos`),
+                fetch(`https://api.github.com/users/${username}/events`)
+            ]);
+
+            const repos = await reposResponse.json();
+            const events = await eventsResponse.json();
+
+            // Calculate total stars earned
+            const totalStars = repos.reduce((acc, repo) => acc + repo.stargazers_count, 0);
+            document.getElementById('total-stars').innerText = totalStars;
+
+            // Calculate total commits in 2024
+            const totalCommits = events.filter(event => event.type === 'PushEvent' && new Date(event.created_at).getFullYear() === 2024).length;
+            document.getElementById('total-commits').innerText = totalCommits;
+
+            // Calculate total PRs
+            const totalPRs = repos.reduce((acc, repo) => acc + repo.open_issues_count, 0); // Assuming open issues as PRs
+            document.getElementById('total-prs').innerText = totalPRs;
+
+            // Calculate total issues
+            const totalIssues = repos.reduce((acc, repo) => acc + repo.open_issues_count, 0);
+            document.getElementById('total-issues').innerText = totalIssues;
+
+            // Calculate contributions in the last year
+            const lastYearContributions = events.filter(event => new Date(event.created_at).getFullYear() === new Date().getFullYear() - 1).length;
+            document.getElementById('contributed-to').innerText = lastYearContributions;
+        }
+
+        // Fetch GitHub data on page load
+        fetchGitHubData();
+    </script>
+</body>
+</html>
